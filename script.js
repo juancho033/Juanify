@@ -41,14 +41,16 @@ let currentIndex = -1;
 let isPlaying = false;
 let currentSource = null;
 let shuffleOn = false;
-let repeatOn = false;
+let repeatMode = 0; // 0=off, 1=repeat-all, 2=repeat-one
 let volume = 80;
 let audioPlayer = null;
 let progressInterval = null;
 let currentView = 'home';
 let currentCategory = 'all';
 let nextId = 100;
-let lastShuffleIndex = -1;
+let shuffleQueue = [];
+let shuffleHistory = [];
+let isSeeking = false;
 
 // YouTube
 let ytPlayer = null;
@@ -94,6 +96,7 @@ const dom = {
     sidebar: $('sidebar'),
     sidebarOverlay: $('sidebarOverlay'),
     toastContainer: $('toastContainer'),
+    adNotice: $('adNotice'),
     navItems: document.querySelectorAll('.nav-item'),
     playlistItems: document.querySelectorAll('.playlist-item'),
     categoryPills: document.querySelectorAll('.category-pill')
@@ -157,7 +160,7 @@ function saveState() {
         localStorage.setItem('juanify_playlist', JSON.stringify(playlist));
         localStorage.setItem('juanify_favorites', JSON.stringify([].concat(Array.from ? Array.from(favorites) : [])));
         localStorage.setItem('juanify_volume', String(volume));
-        localStorage.setItem('juanify_settings', JSON.stringify({ shuffleOn: shuffleOn, repeatOn: repeatOn }));
+        localStorage.setItem('juanify_settings', JSON.stringify({ shuffleOn: shuffleOn, repeatMode: repeatMode }));
     } catch (e) {}
 }
 
@@ -176,7 +179,7 @@ function loadState() {
         var s = localStorage.getItem('juanify_settings');
         if (f) favorites = new Set(JSON.parse(f));
         if (v) volume = Math.min(100, Math.max(0, parseInt(v) || 80));
-        if (s) { var o = JSON.parse(s); shuffleOn = !!o.shuffleOn; repeatOn = !!o.repeatOn; }
+        if (s) { var o = JSON.parse(s); shuffleOn = !!o.shuffleOn; repeatMode = o.repeatMode || 0; }
     } catch (e) { console.warn('loadState error', e); }
 }
 
@@ -286,16 +289,44 @@ function togglePlay() {
     }
 }
 
+function buildShuffleQueue() {
+    shuffleQueue = [];
+    for (var i = 0; i < playlist.length; i++) {
+        if (i !== currentIndex) shuffleQueue.push(i);
+    }
+    for (var i = shuffleQueue.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var tmp = shuffleQueue[i];
+        shuffleQueue[i] = shuffleQueue[j];
+        shuffleQueue[j] = tmp;
+    }
+}
+
 function nextSong() {
     if (!playlist.length) return;
+    // Repeat one: restart current song
+    if (repeatMode === 2 && currentIndex >= 0 && currentIndex < playlist.length) {
+        if (currentSource === 'audio' && audioPlayer) {
+            audioPlayer.currentTime = 0;
+            if (!isPlaying) togglePlay();
+            return;
+        } else if (currentSource === 'youtube' && ytPlayer) {
+            ytPlayer.seekTo(0, true);
+            return;
+        }
+    }
     var nextIdx;
     if (shuffleOn) {
-        do { nextIdx = Math.floor(Math.random() * playlist.length); } while (nextIdx === currentIndex && playlist.length > 1);
-        lastShuffleIndex = currentIndex;
+        if (!shuffleQueue.length) {
+            if (repeatMode === 1) buildShuffleQueue();
+            else { stopAll(); currentIndex = -1; updatePlayIcon(false); return; }
+        }
+        nextIdx = shuffleQueue.shift();
+        if (currentIndex >= 0) shuffleHistory.push(currentIndex);
     } else {
         nextIdx = currentIndex + 1;
         if (nextIdx >= playlist.length) {
-            if (repeatOn) nextIdx = 0;
+            if (repeatMode === 1) nextIdx = 0;
             else { stopAll(); currentIndex = -1; updatePlayIcon(false); return; }
         }
     }
@@ -303,9 +334,20 @@ function nextSong() {
 }
 
 function prevSong() {
-    if (!playlist.length || currentIndex <= 0) return;
-    if (shuffleOn && lastShuffleIndex >= 0) { playSong(lastShuffleIndex); lastShuffleIndex = -1; }
-    else playSong(currentIndex - 1);
+    if (!playlist.length) return;
+    if (shuffleOn) {
+        if (shuffleHistory.length) {
+            var prev = shuffleHistory.pop();
+            shuffleQueue.unshift(currentIndex);
+            playSong(prev);
+            return;
+        }
+    }
+    if (currentIndex > 0) {
+        playSong(currentIndex - 1);
+    } else if (repeatMode === 1) {
+        playSong(playlist.length - 1);
+    }
 }
 
 // ===== PROGRESS =====
@@ -327,11 +369,18 @@ function updateProgressUI(cur, dur) {
     dom.totalTime.textContent = formatTime(dur);
 }
 
-function seekTo(e) {
+function seekTo(clientX) {
     var rect = dom.progressContainer.getBoundingClientRect();
-    var x = (e.clientX - rect.left) / rect.width;
-    if (currentSource === 'audio' && audioPlayer) audioPlayer.currentTime = x * audioPlayer.duration;
-    else if (currentSource === 'youtube' && ytPlayer) try { ytPlayer.seekTo(x * ytPlayer.getDuration(), true); } catch (err) {}
+    var x = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+    var dur = 0;
+    if (currentSource === 'audio' && audioPlayer) {
+        dur = audioPlayer.duration;
+        if (dur > 0) audioPlayer.currentTime = x * dur;
+    } else if (currentSource === 'youtube' && ytPlayer) {
+        dur = ytPlayer.getDuration();
+        if (dur > 0) { try { ytPlayer.seekTo(x * dur, true); } catch (err) {} }
+    }
+    if (dur > 0) updateProgressUI(x * dur, dur);
 }
 
 // ===== UI =====
@@ -362,7 +411,9 @@ function updateFavButton(sid) {
 
 function updateShuffleRepeatUI() {
     dom.shuffleBtn.classList.toggle('active', shuffleOn);
-    dom.repeatBtn.classList.toggle('active', repeatOn);
+    dom.repeatBtn.classList.toggle('active', repeatMode > 0);
+    var icon = dom.repeatBtn.querySelector('i');
+    icon.className = repeatMode === 2 ? 'bi bi-repeat-1' : 'bi bi-repeat';
 }
 
 // ===== VOLUME ICON =====
@@ -506,9 +557,24 @@ function bindEvents() {
     dom.mainPlayBtn.addEventListener('click', togglePlay);
     dom.nextBtn.addEventListener('click', nextSong);
     dom.prevBtn.addEventListener('click', prevSong);
-    dom.shuffleBtn.addEventListener('click', function () { shuffleOn = !shuffleOn; updateShuffleRepeatUI(); saveState(); });
-    dom.repeatBtn.addEventListener('click', function () { repeatOn = !repeatOn; updateShuffleRepeatUI(); saveState(); });
-    dom.progressContainer.addEventListener('click', seekTo);
+    dom.shuffleBtn.addEventListener('click', function () {
+        shuffleOn = !shuffleOn;
+        if (shuffleOn) buildShuffleQueue();
+        else { shuffleQueue = []; shuffleHistory = []; }
+        updateShuffleRepeatUI();
+        saveState();
+    });
+    dom.repeatBtn.addEventListener('click', function () { repeatMode = (repeatMode + 1) % 3; updateShuffleRepeatUI(); saveState(); });
+    // Progress seeking with drag
+    function onProgressStart(e) { isSeeking = true; dom.progressContainer.classList.add('seeking'); var c = e.clientX || (e.touches && e.touches[0].clientX); if (c !== undefined) seekTo(c); e.preventDefault(); }
+    function onProgressMove(e) { if (!isSeeking) return; var c = e.clientX || (e.touches && e.touches[0].clientX); if (c !== undefined) seekTo(c); e.preventDefault(); }
+    function onProgressEnd(e) { if (!isSeeking) return; isSeeking = false; dom.progressContainer.classList.remove('seeking'); var c = e.clientX || (e.changedTouches && e.changedTouches[0].clientX); if (c !== undefined) seekTo(c); e.preventDefault(); }
+    dom.progressContainer.addEventListener('mousedown', onProgressStart);
+    document.addEventListener('mousemove', onProgressMove);
+    document.addEventListener('mouseup', onProgressEnd);
+    dom.progressContainer.addEventListener('touchstart', onProgressStart, { passive: false });
+    document.addEventListener('touchmove', onProgressMove, { passive: false });
+    document.addEventListener('touchend', onProgressEnd);
     dom.volumeSlider.addEventListener('input', function (e) {
         volume = parseInt(e.target.value);
         if (ytPlayer && ytPlayer.setVolume) ytPlayer.setVolume(volume);
@@ -616,6 +682,17 @@ function init() {
     if (playlist.length) {
         updatePlayerUI(playlist[0]);
         updateFavButton(playlist[0].id);
+    }
+
+    if (navigator.brave && navigator.brave.isBrave) {
+        navigator.brave.isBrave().then(function (isBrave) {
+            if (isBrave) {
+                dom.adNotice.innerHTML = '<i class="bi bi-shield-check" style="color:var(--turquoise);"></i> <span style="color:#94a3b8;">Gracias por usar <strong style="color:#e2e8f0;">Brave</strong> — disfrutas de m\u00fasica sin anuncios <i class="bi bi-emoji-smile"></i></span>';
+            }
+            dom.adNotice.style.display = 'flex';
+        });
+    } else {
+        dom.adNotice.style.display = 'flex';
     }
 
     bindEvents();

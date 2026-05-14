@@ -436,7 +436,8 @@ body {
     transition: opacity 0.2s;
 }
 
-.player-progress-container:hover .player-progress-thumb { opacity: 1; }
+.player-progress-container:hover .player-progress-thumb,
+.player-progress-container.seeking .player-progress-thumb { opacity: 1; }
 
 .player-inner {
     display: flex;
