@@ -784,6 +784,73 @@ body {
     to { opacity: 1; transform: translateY(0); }
 }
 
+/* ===== PLAYLIST UI ===== */
+.pl-add-btn {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    z-index: 3;
+    color: rgba(255,255,255,0.7);
+    font-size: 1.2rem;
+    cursor: pointer;
+    opacity: 0;
+    transition: all 0.25s;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.6);
+    background: rgba(0,0,0,0.3);
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.song-card:hover .pl-add-btn,
+.song-card .pl-add-btn:hover { opacity: 1; }
+.pl-add-btn:hover { color: #2dd4bf; transform: scale(1.15); }
+
+.playlist-actions {
+    display: none;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.75rem;
+}
+.playlist-item:hover .playlist-actions { display: flex; }
+.playlist-actions i {
+    cursor: pointer;
+    padding: 2px 4px;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+.playlist-actions i:hover { color: #e2e8f0 !important; background: rgba(255,255,255,0.1); }
+.playlist-actions .playlist-delete:hover { color: #f43f5e !important; }
+
+.playlist-check-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 260px;
+    overflow-y: auto;
+}
+.playlist-check-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.04);
+    cursor: pointer;
+    transition: background 0.2s;
+    font-size: 0.85rem;
+    color: var(--text-primary);
+}
+.playlist-check-item:hover { background: rgba(255,255,255,0.08); }
+.playlist-check-item input[type="checkbox"] {
+    accent-color: var(--turquoise);
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
 /* Touch devices: show play overlay always with low opacity */
 @media (hover: none) and (pointer: coarse) {
     .play-overlay { opacity: 0.25; }
@@ -977,3 +1044,8 @@ body {
 #musicContainer > [class*="col-"]:nth-child(23) .song-card { animation-delay: 0.68s; }
 #musicContainer > [class*="col-"]:nth-child(24) .song-card { animation-delay: 0.71s; }
 #musicContainer > [class*="col-"]:nth-child(25) .song-card { animation-delay: 0.74s; }
+
+.input_playlist::placeholder {
+  color: #2dd4bf; /* Cambia al color deseado */
+  opacity: 1; /* Asegura que el color se vea en Firefox */
+}
