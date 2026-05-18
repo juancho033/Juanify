@@ -31,7 +31,8 @@ var INITIAL_PLAYLIST = [
     { id: 22, title: "Mi Libertador", artist: "Marcos Vidal", source: "youtube", videoId: "0UFQCD0L7LQ", category: "alabanza" },
     { id: 23, title: "Te Alabarán", artist: "Miel San Marcos", source: "youtube", videoId: "b5XfBVlHRR0", category: "alabanza" },
     { id: 24, title: "Grande Y Fuerte", artist: "Su Presencia", source: "youtube", videoId: "QTrs_GLDZUg", category: "alabanza" },
-    { id: 25, title: "Mi Esperanza Está en Jesús", artist: "Redder", source: "youtube", videoId: "fF5k8vIJ-hs", category: "adoracion" }
+    { id: 25, title: "Mi Esperanza Está en Jesús", artist: "Redder", source: "youtube", videoId: "fF5k8vIJ-hs", category: "adoracion" },
+    { id: 26, title: "El cielo y la tierra", artist: "Julio Melgar", source: "youtube", videoId: "fK6qo2Vgvzw", category: "alabanza" }
 ];
 
 // ===== STATE =====
