@@ -21,18 +21,19 @@ var INITIAL_PLAYLIST = [
     { id: 12, title: "No Hay Lugar Más Alto", artist: "Miel San Marcos", source: "youtube", videoId: "UbEUeFC3lh4", category: "alabanza" },
     { id: 13, title: "Creo En Ti", artist: "Julio Melgar", source: "youtube", videoId: "UoYnVTKaImQ", category: "adoracion" },
     { id: 14, title: "Jesús", artist: "Marcos Brunet", source: "youtube", videoId: "PYVsJk2xIc4", category: "adoracion" },
-    { id: 15, title: "Eres Fiel", artist: "Marcos Witt", source: "youtube", videoId: "zYUBnm3FNHI", category: "adoracion" },
+    { id: 15, title: "Eres Fiel", artist: "Marcos Witt", source: "youtube", videoId: "QK2UJZqKHNs", category: "adoracion" },
     { id: 16, title: "Coritos", artist: "Evan Craft", source: "youtube", videoId: "TICFo9twNWc", category: "alabanza" },
-    { id: 17, title: "Mi Casa", artist: "Oasis Ministry", source: "youtube", videoId: "Rs70m5wR8iI", category: "alabanza" },
+    { id: 17, title: "Si Tu Presencia Conmigo No Va", artist: "Oasis Ministry", source: "youtube", videoId: "kixibYdS9hY", category: "adoracion" },
     { id: 18, title: "Vida Encontré", artist: "Gateway Worship Español", source: "youtube", videoId: "92KpPPI3uqE", category: "alabanza" },
-    { id: 19, title: "Rey de Reyes", artist: "Jesús Culture en Español", source: "youtube", videoId: "IKeWezBFmTg", category: "adoracion" },
-    { id: 20, title: "Fuego", artist: "En Espíritu y Verdad", source: "youtube", videoId: "E6MFtGj6fEY", category: "alabanza" },
-    { id: 21, title: "Sobre la Roca", artist: "Luigi Sánchez", source: "youtube", videoId: "I0Qa8Y3hN4Y", category: "alabanza" },
-    { id: 22, title: "Mi Libertador", artist: "Marcos Vidal", source: "youtube", videoId: "0UFQCD0L7LQ", category: "alabanza" },
-    { id: 23, title: "Te Alabarán", artist: "Miel San Marcos", source: "youtube", videoId: "b5XfBVlHRR0", category: "alabanza" },
+    { id: 19, title: "Rey de Reyes", artist: "Jesús Culture en Español", source: "youtube", videoId: "AS2V_EvHR8g", category: "adoracion" },
+    { id: 20, title: "Fuego", artist: "En Espíritu y Verdad", source: "youtube", videoId: "nwtCsOfbbZw", category: "alabanza" },
+    { id: 21, title: "Sobre la Roca", artist: "Luigi Sánchez", source: "youtube", videoId: "X1Hacr4bFp8", category: "alabanza" },
+    { id: 22, title: "Mi Libertador", artist: "Marcos Vidal", source: "youtube", videoId: "bBUmp2AsIXs", category: "alabanza" },
+    { id: 23, title: "Mil Gracias", artist: "Miel San Marcos", source: "youtube", videoId: "9Dp6-dE1MTU", category: "alabanza" },
     { id: 24, title: "Grande Y Fuerte", artist: "Su Presencia", source: "youtube", videoId: "QTrs_GLDZUg", category: "alabanza" },
-    { id: 25, title: "Mi Esperanza Está en Jesús", artist: "Redder", source: "youtube", videoId: "fF5k8vIJ-hs", category: "adoracion" },
-    { id: 26, title: "El cielo y la tierra", artist: "Julio Melgar", source: "youtube", videoId: "fK6qo2Vgvzw", category: "alabanza" }
+    { id: 25, title: "Mi Esperanza Está en Jesús", artist: "Redder", source: "youtube", videoId: "Z3KqXRIdAYk", category: "adoracion" },
+    { id: 26, title: "El cielo y la tierra", artist: "Julio Melgar", source: "youtube", videoId: "fK6qo2Vgvzw", category: "alabanza" },
+    { id: 27, title: "I can Only Imagine", artist: "Mercy Me", source: "youtube", videoId: "9isJm14XJlc", category: "alabanza" }
 ];
 
 // ===== STATE =====
